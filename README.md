@@ -1,2 +1,2 @@
 # Coding Projects
-Various Personal and Academic projects
+Various Personal and Academic Projects
