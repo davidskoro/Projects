@@ -49,10 +49,27 @@ dcd.set(xlabel='Date',ylabel="Ammount", title="Cases and Deaths over Time")
 dcd.get_figure()
 dcd.get_figure().savefig('output/Time_Cases&Death.jpg', bbox_inches='tight')
 
-# plot case fatality rare over time 
+# plot case fatality rate over time 
 cfr = daily.plot.line(y='cfr')
 cfr.set(xlabel='Date', ylabel='Ammount', title="Case Fataltity Rate over Time")
 cfr.get_figure()
 cfr.get_figure().savefig('output/Time_CFR.jpg', bbox_inches='tight')
+
+# plot case growth rate over time
+# dailygr = daily[daily.cases >= 10]
+growth = daily.plot.line(y='cases', logy=True)
+growth.set(title="Case Growth Rate USA Over Time", xlabel="Date", ylabel= "Ammount")
+growth.get_figure()
+growth.get_figure().savefig('output/Case_CGR.jpg', bbox_inches='tight')
+
+# comapre the case growth rate to multiple states
+states_compare = ['New York', 'California', 'Florida']
+stategr = state[state['state'].isin(states_compare)]
+stategrc= stategr[stategr.cases >=10] 
+stategr_plot = stategrc.groupby(['date', 'state'])['cases'].sum()
+stategr_plotf = stategr_plot.unstack().plot(logy=True)
+stategr_plotf.set(title="Case Growth Rate by State", xlabel="Date", ylabel="Ammount")
+stategr_plotf.get_figure()
+stategr_plotf.get_figure().savefig('output/Case_CGRS.jpg', bbox_inches='tight')
 
 #%%
