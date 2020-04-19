@@ -5,6 +5,7 @@ COVID-19 Analysis
 """
 
 import pandas as pd
+from datetime import datetime , timedelta
 
 #%% Read in the data
 
@@ -72,4 +73,19 @@ stategr_plotf.set(title="Case Growth Rate by State", xlabel="Date", ylabel="Ammo
 stategr_plotf.get_figure()
 stategr_plotf.get_figure().savefig('output/Case_CGRS.jpg', bbox_inches='tight')
 
-#%%
+#%% Insights from the past day
+
+yesterday = datetime.today() - timedelta(days = 2)
+yesterdayf = yesterday.strftime('%Y-%m-%d')
+
+statepred = state[state.date >= yesterdayf]
+statepredgroup = statepred.groupby(['state', 'date']).sum()
+statepredgroup['new_cases'] = statepredgroup.sort_values(['state','date']).groupby('state')['cases'].diff()
+statepredgroup['pct_increase'] = statepredgroup.sort_values(['state','date']).groupby('state')['cases'].pct_change()
+statechanges = statepredgroup.dropna(subset=['new_cases'])
+
+countypred = county
+countypred['new_cases'] = countypred.sort_values(['date']).groupby('fips')['cases'].diff()
+countypred['pct_increase'] = countypred.sort_values(['date']).groupby('fips')['cases'].pct_change()
+countydrop = countypred.dropna(subset=['new_cases'])
+countychanges = countydrop[countypred.date >= yesterday]
