@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
-"""
-COVID-19 Analysis
-
-"""
+#########################################################################################################################################################
+# COVID-19 Analysis                                                                                                                                     #
+# COVID-19 case growth, case totals, fatality rate, and percentage change at the county, state, and country level                                       #                                                  
+#-------------------------------------------------------------------------------------------------------------------------------------------------------#
+# State and County data from The New York Times: https://github.com/nytimes/covid-19-data                                                               #
+# State: https://github.com/nytimes/covid-19-data/blob/master/us-states.csv                                                                             #
+# County: https://github.com/nytimes/covid-19-data/blob/master/us-counties.csv                                                                          #
+# Global data from Johns Hopkins CSSE: https://github.com/CSSEGISandData/COVID-19                                                                       #
+# Country: https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv #
+#########################################################################################################################################################
 
 import pandas as pd
 from datetime import datetime , timedelta
 
 #%% Read in the data
-
 county = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv')
 state = pd.read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv')
 
 #%% Clean the data
 
+# Set datetime formating
 state['date'] = pd.to_datetime(state['date'])
 county['date'] = pd.to_datetime(state['date'])
 
@@ -22,47 +28,55 @@ county.describe (include='all')
 
 #%% Summarize the data
 
-# display values grouped by date
+# Display values grouped by date
 daily = state.groupby('date').sum()
+# Percentage change in daily cases
 daily['pct_cases'] = daily['cases'].pct_change()
+# Percentage change in daily deaths
 daily['pct_deaths'] = daily['deaths'].pct_change()
+# Daily case fatality rate (deaths/cases) 
 daily['cfr'] = daily['deaths'] / daily['cases']
 daily.to_csv('output/daily_usa.csv')
                                 
-# display values grouped by state
+# Display values grouped by state
 statecfr = state.groupby('state').sum()
+# Case fatality rate (deaths/cases) by state
 statecfr['cfr'] = statecfr['deaths'] / statecfr['cases']           
 statecfr.to_csv('output/state_data.csv')
 
-# display values grouped by county
+# Display values grouped by county
 countycfr = county.groupby('county').sum()
+# Case fatality rate (deaths/cases) by county
 countycfr['cfr'] = countycfr['deaths'] / countycfr['cases']
 countycfr.to_csv('output/county_data.csv')
 
 #%% Visualize the data
 
-# plot cases and deaths over time
+# Plot cases and deaths over time
 dcd = daily.plot.line(y=['cases','deaths'])
-dcd.set(xlabel='Date',ylabel="Ammount", title="Cases and Deaths over Time")
+dcd.set(xlabel='Date',ylabel="Ammount", title="Cases and Deaths over Time USA")
 dcd.get_figure()
 dcd.get_figure().savefig('output/Time_Cases&Death.jpg', bbox_inches='tight')
 
-# plot case fatality rate over time 
+# Plot case fatality rate over time 
 cfr = daily.plot.line(y='cfr')
-cfr.set(xlabel='Date', ylabel='Ammount', title="Case Fataltity Rate over Time")
+cfr.set(xlabel='Date', ylabel='Ammount', title="Case Fataltity Rate over Time USA")
 cfr.get_figure()
 cfr.get_figure().savefig('output/Time_CFR.jpg', bbox_inches='tight')
 
-# plot case growth rate over time
+# Plot case growth rate over time logarithmically
 growth = daily.plot.line(y='cases', logy=True)
 growth.set(title="Case Growth Rate USA Over Time", xlabel="Date", ylabel= "Ammount")
 growth.get_figure()
 growth.get_figure().savefig('output/Case_CGR.jpg', bbox_inches='tight')
 
-# comapre the case growth rate to multiple states
+# Comapre the case growth rate of multiple states 
+# Select states to compare
 states_compare = ['New York', 'California', 'Florida']
 stategr = state[state['state'].isin(states_compare)]
+# Begin plotting when state cases reach 10
 stategrc= stategr[stategr.cases >=10] 
+# Configure data to plot, plot logarithmically
 stategr_plot = stategrc.groupby(['date', 'state'])['cases'].sum()
 stategr_plotf = stategr_plot.unstack().plot(logy=True)
 stategr_plotf.set(title="Case Growth Rate by State", xlabel="Date", ylabel="Ammount")
