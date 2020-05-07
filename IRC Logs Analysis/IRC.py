@@ -12,24 +12,23 @@ import pandas as pd
 
 #%% Build functions
 
-# Find messages
+# Find all messages
 def is_message(row):
     if re.search(r'<', row[6]):
+        if re.search (r'(<\+evilbot>)', row):
+            return False
         print('Row :', row)
         return True
     return False
 
 # Get Username
 def get_user_name (row):
-    #print('get_user_name: row = ', row)
     username = re.search (r'<([ +%~@&])([-|\[\]\w\^\{\}\\\`]+)>', row)
-    #print('in get_user_name:' , username.group(2))
     return username.group(2)
     
 # Get Message
 def get_chat_message(row):
     row_parts = re.split(r'> ', row)
-    #print( 'Row Part', row_parts)
     message = '> '.join(row_parts[1:])
     print('Message:', message)
     return message
@@ -44,6 +43,24 @@ def log_on_name(row):
     loginid = re.search (r' ([\[])([\w\.`\[\]\|^_{\\}-]+)([@])', row)
     return loginid.group(2)
 
+# Get individual words
+def get_words(row):
+    word_parts = re.split(r'(\w+)', row)
+    print( 'Row Part', word_parts)
+    words = word_parts[7:]
+    print('Words:', words)
+    return words  
+
+def get_onion (row):
+    if re.search (r'(\w+)(\.onion)', row):
+        print('Onion:', row)
+        return True
+    return False
+
+def darkweb_sites (row):
+    site_row = re.search (r'(\w+)(\.onion)', row)
+    return site_row.group()
+
 #%% Open the data
 
 raw_log = ""
@@ -57,6 +74,7 @@ raw_log = raw_log
     
 chat_records = []
 
+
 for row in raw_log :
     if is_message(row):
         username = get_user_name(row)
@@ -67,14 +85,18 @@ for row in raw_log :
     else:
         pass
 
+# All chat messages 
 chat_records_df = pd.DataFrame(chat_records)
 
+# All usernames that sent a message and the ammount of messages each username sent 
 username_df = pd.DataFrame()
 username_df['Username'] = chat_records_df['username']
 username_df['Message Count'] = 1
-username_df = username_df[username_df.Username != 'evilbot']
 username_count = username_df.groupby('Username').count()
 username_count = username_count.sort_values('Message Count', ascending = False)
+
+# Total number of written messages
+chat_records_df[['message']].count()
 
 #%% Create for loop to iterate through rows for Log in
 
@@ -90,9 +112,37 @@ for row in raw_log :
     else:
         pass
 
+# All logins (Different then username) and how many times they logged in
 login_ID_df = pd.DataFrame(login_records)
 login_ID_df ['Logins'] = 1
 login_count = login_ID_df.groupby('LoginID').count()
 login_count = login_count.sort_values('Logins', ascending = False)
 
+#%% Create a for loop to iterate through for, seperating into individual words and counting most common
 
+allwords = []
+
+for row in raw_log :
+    if is_message(row):
+        all_words = get_words(row)
+        allwords.extend(all_words)
+    else:
+        pass
+
+word_df = pd.DataFrame(allwords)
+word_df.rename(columns= {0:'Word'}, inplace=True)
+word_df ['Count'] = 1
+word_df = word_df[word_df.Word != " "][word_df.Word != "\n"][word_df.Word != " \n"][word_df.Word != ', \n']
+word_count = word_df.groupby('Word').count()
+
+#%%
+
+darkweb = []
+
+for row in raw_log:
+    if get_onion(row):
+        darksite = darkweb_sites(row)
+        print('Dark Web:', darksite)
+        darkweb.append(darksite)
+    else:
+        pass
