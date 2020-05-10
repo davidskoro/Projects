@@ -7,6 +7,8 @@ IRC Logs - Text Analysis
 Analyzed textual log data from an online chat forum 
 associated with hacking and the dark web.
 
+Data from "Hacker.zip/Hacker/hackers.log": https://www.azsecure-data.org/internet-relay-chat.html
+
 @author: David
 """
 
