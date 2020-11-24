@@ -2,6 +2,14 @@
 """
 Created on Tue Oct 27 14:29:46 2020
 
+############################################################################################################################################################################
+# Product Listing Analysis and prediction                                                                                                                           
+# Product listing data from Wish.com, providing insight into variables imapcting Units Sold 
+# and a model for predicting Units Sold with 41.62% accuracy.                        
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Data found through Kaggle.com: https://www.kaggle.com/jmmvutu/summer-products-and-sales-in-ecommerce-wish?select=summer-products-with-rating-and-performance_2020-08.csv                                                         
+############################################################################################################################################################################
+
 @author: David
 """
 import pandas as pd
